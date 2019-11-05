@@ -1,0 +1,18 @@
+
+{
+  "display_name": "Go, testify",
+
+  "visible_filenames": [
+    "hiker_test.go",
+    "hiker.go",
+    "cyber-dojo.sh"
+  ],
+
+  "image_name": "cyberdojofoundation/go_testify",
+
+  "filename_extension": ".go",
+
+  "max_seconds": 15,
+  
+  "tab_size": 4
+}
