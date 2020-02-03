@@ -13,7 +13,7 @@ RUN apk add --update coreutils bash tar file
 
 LABEL maintainer=jon@jaggersoft.com
 
-RUN apk add build-base
+RUN apk add build-base 
 RUN go get github.com/stretchr/testify
 
 COPY red_amber_green.rb /usr/local/bin
