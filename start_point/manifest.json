@@ -1,8 +1,8 @@
-
 {
   "image_name": "cyberdojofoundation/go_testify",
   "display_name": "Go, testify",
-  "visible_filenames": [
+  "visible_filenames":
+  [
     "hiker_test.go",
     "hiker.go",
     "cyber-dojo.sh"
