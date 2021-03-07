@@ -1,5 +1,6 @@
 FROM cyberdojofoundation/go:551c481
 LABEL maintainer=jon@jaggersoft.com
+LABEL maintainer=john@reese.dev
 
 RUN apk add build-base
 ENV GO111MODULE=auto
