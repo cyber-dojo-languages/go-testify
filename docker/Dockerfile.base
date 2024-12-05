@@ -3,10 +3,10 @@ LABEL maintainer=jon@jaggersoft.com
 LABEL maintainer=john@reese.dev
 
 RUN apk add build-base
-ENV GO111MODULE=auto
 
-COPY install.sh .
-RUN ./install.sh && rm ./install.sh
+RUN go mod init cdl-go-testify
+RUN go get github.com/stretchr/testify
+RUN go mod download all
 
 
 COPY red_amber_green.rb /usr/local/bin
