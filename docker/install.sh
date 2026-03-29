@@ -1,7 +1,25 @@
 #!/bin/bash -Eeu
 
 mkdir cdl && cd cdl
-go mod init cdl-go-testify
-go get github.com/stretchr/testify
-go mod download all
+
+cat > go.mod << 'EOF'
+module cdl-go-testify
+
+go 1.26.1
+
+require github.com/stretchr/testify v1.11.1
+EOF
+
+# Dummy file so go mod tidy and go build include testify/assert
+cat > dummy.go << 'EOF'
+package cdl
+import _ "github.com/stretchr/testify/assert"
+EOF
+
+# Resolve all deps (updates go.mod with indirect deps and populates go.sum)
 go mod tidy
+
+# Pre-compile testify into a shared build cache accessible by all users
+mkdir /go/build-cache
+GOCACHE=/go/build-cache go build ./...
+chmod -R 777 /go/build-cache
