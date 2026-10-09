@@ -2,6 +2,12 @@
 
 mkdir cdl && cd cdl
 
+# testify is pinned in both go.mod files below, not left to go mod tidy,
+# because the start-point's go.mod names an exact version and a kata runs with
+# no network. The image is rebuilt every week under the same tag, so an
+# unpinned testify drifts away from the start-point and every light comes out
+# amber. Do not drop either require line. Raising the version means raising
+# both, and the start-point's go.mod to match.
 cat > go.mod << 'EOF'
 module cdl-go-testify
 
