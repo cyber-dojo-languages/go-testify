@@ -1,19 +1,41 @@
 #!/bin/bash -Eeu
 
+# Appends one test framework to the test_frameworks list the base image
+# wrote in /versions.json, keeping any entry an earlier image added. Stops
+# the build if the list is not found, rather than record nothing. Short grep
+# flags because busybox grep has no long ones.
+add_test_framework()
+{
+  local -r name="${1}"
+  local -r version="${2}"
+  local -r entry="{\"name\": \"${name}\", \"version\": \"${version}\"}"
+  if grep -q '"test_frameworks": \[\]' /versions.json; then
+    sed -i "s|\"test_frameworks\": \[\]|\"test_frameworks\": [${entry}]|" /versions.json
+  else
+    sed -i "/\"test_frameworks\": \[/s|}\]|}, ${entry}]|" /versions.json
+  fi
+  if ! grep -q -F "${entry}" /versions.json; then
+    echo "Could not add ${name} to /versions.json" >&2
+    cat /versions.json >&2
+    exit 1
+  fi
+}
+
+# The newest testify release, resolved once here at build time and written
+# into both go.mod files below, so the image holds one version. A kata runs
+# with no network, so the start-point's go.mod and go.sum must name this same
+# version; they are printed at the end of this build for the start-point's
+# copies to be updated to match.
+readonly TESTIFY_VERSION=$(go list -m -f '{{.Version}}' github.com/stretchr/testify@latest)
+
 mkdir cdl && cd cdl
 
-# testify is pinned in both go.mod files below, not left to go mod tidy,
-# because the start-point's go.mod names an exact version and a kata runs with
-# no network. The image is rebuilt every week under the same tag, so an
-# unpinned testify drifts away from the start-point and every light comes out
-# amber. Do not drop either require line. Raising the version means raising
-# both, and the start-point's go.mod to match.
-cat > go.mod << 'EOF'
+cat > go.mod << EOF
 module cdl-go-testify
 
 go 1.26.1
 
-require github.com/stretchr/testify v1.11.1
+require github.com/stretchr/testify ${TESTIFY_VERSION}
 EOF
 
 # Dummy file so go mod tidy and go build include testify/assert
@@ -41,12 +63,12 @@ GOCACHE=/go/build-cache go build ./...
 # reaches for.
 mkdir warmup && cd warmup
 
-cat > go.mod << 'EOF'
+cat > go.mod << EOF
 module cdl-go-testify-warmup
 
 go 1.26.1
 
-require github.com/stretchr/testify v1.11.1
+require github.com/stretchr/testify ${TESTIFY_VERSION}
 EOF
 
 cat > hiker.go << 'EOF'
@@ -100,6 +122,18 @@ if [ "$(echo "${COLD_SECONDS} > ${WARM_SECONDS} * 3" | bc -l)" != '1' ]; then
   >&2 echo "The cache is not being hit, so a kata's first press will rebuild."
   exit 42
 fi
+
+add_test_framework testify "${TESTIFY_VERSION#v}"
+cat /versions.json
+
+# The start-point's go.mod and go.sum must require exactly what this image
+# holds. These are printed between markers so they can be copied from the
+# build log into the start-point whenever a rebuild picks up a new release.
+echo '--- start-point go.mod requires ---'
+sed -n '/^require/,$p' go.mod
+echo '--- start-point go.sum ---'
+cat go.sum
+echo '--- end ---'
 
 cd ..
 rm -rf warmup
