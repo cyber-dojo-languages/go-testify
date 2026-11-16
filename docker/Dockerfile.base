@@ -1,4 +1,4 @@
-FROM ghcr.io/cyber-dojo-languages/go:22bad26@sha256:ed88aab5f9bf4e5753a77876659456ad59c4a3e864cb02498145e8cf3cf20e9b
+FROM ghcr.io/cyber-dojo-languages/go:22bad26@sha256:be42d76c1033bcf58baf043821f94c882c35d068f30212f88a7472985bdec22d
 LABEL maintainer=jon@jaggersoft.com
 LABEL maintainer=john@reese.dev
 
